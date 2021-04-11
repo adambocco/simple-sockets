@@ -1,0 +1,2 @@
+SERVER_PORT=12000
+PATH=/mnt/c/Users/User/Documents/Projects/haskellpractice/csc463/Share
