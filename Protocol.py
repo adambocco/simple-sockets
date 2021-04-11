@@ -4,6 +4,7 @@
 HEAD_REQUEST="REQ"
 HEAD_FILE="FIL"
 HEAD_ERROR="ERR"
+HEAD_UPLOAD="UPL"
 
 # prepare the message
 

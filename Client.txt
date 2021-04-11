@@ -1,4 +1,5 @@
 SERVER=localhost
 SERVER_PORT=12000
-PATH=/mnt/c/Users/User/Documents/Projects/haskellpractice/csc463/Download
+CLIENT_DOWNLOAD_PATH=/mnt/c/Users/User/Documents/Projects/haskellpractice/csc463/clientDownload
+CLIENT_SHARE_PATH=/mnt/c/Users/User/Documents/Projects/haskellpractice/csc463/clientShare
 CLIENT_PORT=12001

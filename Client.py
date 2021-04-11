@@ -17,7 +17,8 @@ class Client:
         print("=========================================")
         print("1. View the List of Available Files")
         print("2. Download File")
-        print("3. Quit")
+        print("3. Upload File")
+        print("4. Quit")
         print("=========================================")
     
     # Function to get user selection from the menu
@@ -25,13 +26,13 @@ class Client:
     def getUserSelection(self):
         selection = 0
 
-        while selection > 3 or selection < 1:
+        while selection > 4 or selection < 1:
             self.printMenu()
             try:
                 selection = int(input())
             except:
                 selection=0
-            if (selection <=3 and selection >=1):
+            if (selection <=4 and selection >=1):
                 return selection
             print("Invalid Option")
 
@@ -53,17 +54,25 @@ class Client:
         header, msg = Protocol.decodeMessage(mySocket.recv(1024).decode())
 
         mySocket.close()
-
+        print("HEAAAADER: ",header)
         if (header == Protocol.HEAD_REQUEST):
             files = msg.split(",")
             self.fileList = []
             for f in files:
                 self.fileList.append(f)
 
+
+    def getUploadFileList(self):
+        self.uploadFileList = os.listdir(self.conf.clientSharePath)
+
+    def printUploadFileList(self):
+        for i,f in enumerate(self.uploadFileList):
+            print('{:<3d}{}'.format(i, f))
+
+
     # Function to print out file names
 
     def printFileList(self):
-        
         for i,f in enumerate(self.fileList):
             print('{:<3d}{}'.format(i, f))
 
@@ -85,6 +94,23 @@ class Client:
                 return self.fileList[ans]
             print("Invalid number")
 
+
+    def selectUploadFile(self):
+
+        self.getUploadFileList()
+        ans = -1
+        while (ans < 0 or ans > len(self.uploadFileList)):
+            self.printUploadFileList()
+            print("Please select the file you want to upload (Enter the number of the file)")
+            try:
+                ans = int(input())
+            except:
+                ans = -1
+            if (ans >= 0 and ans < len(self.uploadFileList)):
+                return self.uploadFileList[ans]
+            print("Invalid number")
+
+
     # Function to download file
 
     def downloadFile(self, fileName):
@@ -93,7 +119,7 @@ class Client:
 
         mySocket.send(request)
 
-        with open(self.conf.downloadPath+"/"+fileName, "wb") as f:
+        with open(self.conf.clientDownloadPath+"/"+fileName, "wb") as f:
             while True:
                 data = mySocket.recv(1024)
                 if not data:
@@ -102,13 +128,25 @@ class Client:
             print(fileName+" has been downloaded!")
             mySocket.close()
     
+
+    def uploadFile(self, uploadFileName):
+        mySocket = self.connect()
+        request = Protocol.prepareMessage(Protocol.HEAD_UPLOAD, uploadFileName)   
+        mySocket.send(request)
+
+        f=open(self.conf.clientSharePath + "/"  + uploadFileName, 'rb')
+        l=f.read(1024)
+        while(l):
+            mySocket.send(l)
+            l=f.read(1024)
+
     # Main logic of the client
 
     def start(self):
 
         selection = 0
 
-        while selection != 3:
+        while selection != 4:
             selection = self.getUserSelection()
 
             if selection == 1:
@@ -121,6 +159,11 @@ class Client:
                 print("Downloading file")
                 self.downloadFile(fileName)
               
+            elif selection == 3:
+
+                fileName = self.selectUploadFile()
+                print("Uploading file: " + fileName)
+                self.uploadFile(fileName)
             else:
                 pass
 

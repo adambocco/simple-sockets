@@ -9,7 +9,7 @@ class Server:
         self.conf=Config.Config()
 
     def getFileList(self):
-        return os.listdir(self.conf.sharedPath)
+        return os.listdir(self.conf.serverSharePath)
 
     def sendFileList(self, serverSocket):
         message = Protocol.prepareFileList(Protocol.HEAD_REQUEST, self.getFileList())
@@ -21,6 +21,19 @@ class Server:
         while(l):
             serverSocket.send(l)
             l=f.read(1024)
+
+
+
+
+    def receiveFile(self, socket, uploadFileName):
+        with open(uploadFileName, "wb") as f:
+            while True:
+                data = socket.recv(1024)
+                if not data:
+                    break
+                f.write(data)
+            print(uploadFileName+" has been downloaded!")
+            socket.close()
 
 
     # The main logic of the server
@@ -42,7 +55,9 @@ class Server:
             if (header == Protocol.HEAD_REQUEST):
                 self.sendFileList(connectionSocket)
             elif (header == Protocol.HEAD_FILE):
-                self.sendFile(connectionSocket, self.conf.sharedPath+"/"+msg)
+                self.sendFile(connectionSocket, self.conf.serverSharePath+"/"+msg)
+            elif (header == Protocol.HEAD_UPLOAD):
+                self.receiveFile(connectionSocket, self.conf.serverDownloadPath+"/"+msg)
             else:
                 connectionSocket.send(Protocol.prepareMessage(Protocol.HEAD_ERROR, ""))
             connectionSocket.close()

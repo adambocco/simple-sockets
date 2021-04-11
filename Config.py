@@ -15,8 +15,10 @@ class Config:
                     sub=l.strip().split("=")
                     if (sub[0] == "SERVER_PORT"):
                         self.serverPort = int(sub[1])
-                    elif (sub[0] =="PATH"):
-                        self.sharedPath = sub[1]
+                    elif (sub[0] =="SERVER_DOWNLOAD_PATH"):
+                        self.serverDownloadPath = sub[1]
+                    elif (sub[0] =="SERVER_SHARE_PATH"):
+                        self.serverSharePath = sub[1]
                     else:
                         pass
         except:
@@ -35,8 +37,10 @@ class Config:
                         self.clientPort = int(sub[1])
                     elif (sub[0] =="SERVER"):
                         self.serverName = sub[1]
-                    elif (sub[0] =="PATH"):
-                        self.downloadPath = sub[1]
+                    elif (sub[0] =="CLIENT_DOWNLOAD_PATH"):
+                        self.clientDownloadPath = sub[1]
+                    elif (sub[0] =="CLIENT_SHARE_PATH"):
+                        self.clientSharePath = sub[1]
                     else:
                         pass
         except:
