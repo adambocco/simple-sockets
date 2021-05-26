@@ -1,11 +1,24 @@
+import os
+
 
 class Config:
     serverConfig="Server.txt"
     clientConfig="Client.txt"
 
-    def __init__(self):
-        self.readClientConfig()
-        self.readServerConfig()
+    def __init__(self, configType):
+        if configType == self.serverConfig:
+            if os.path.exists(self.serverConfig):
+                self.readServerConfig()
+            else:
+                print("Server configuration file does not exist.")
+        elif configType == self.clientConfig:
+            if os.path.exists(self.clientConfig):
+                self.readClientConfig()
+            else:
+                print("Client configuration file does not exist.")
+        else:
+            print("Invalid configuration type")
+
 
     def readServerConfig(self):
         try:
@@ -46,9 +59,3 @@ class Config:
         except:
             print( Exception.message() )
                     
-
-
-def test():
-    c = Config()
-
-test()

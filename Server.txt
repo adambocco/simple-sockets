@@ -1,3 +1,3 @@
 SERVER_PORT=12000
-SERVER_DOWNLOAD_PATH=/mnt/c/Users/User/Documents/Projects/haskellpractice/csc463/serverDownload
-SERVER_SHARE_PATH=/mnt/c/Users/User/Documents/Projects/haskellpractice/csc463/serverShare
+SERVER_DOWNLOAD_PATH=./serverDownload
+SERVER_SHARE_PATH=./serverShare

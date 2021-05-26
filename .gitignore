@@ -1,3 +1,6 @@
-Download/*
-Share/*
+serverDownload/*
+serverShare/*
 __pycache__
+.dist
+clientDownload/*
+clientShare/*

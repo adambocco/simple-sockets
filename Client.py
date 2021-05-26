@@ -7,7 +7,7 @@ from socket import *
 class Client:
     
     def __init__(self):
-        self.conf = Config.Config()
+        self.conf = Config.Config(Config.Config.clientConfig)
 
     # Function to print out user menu
 
@@ -45,7 +45,7 @@ class Client:
 
     # Function to get file list from the server
     
-    def getFileList(self):
+    def getDownloadFileList(self):
         mySocket=self.connect()
         
         request = Protocol.prepareMessage(Protocol.HEAD_REQUEST, "")
@@ -54,78 +54,81 @@ class Client:
         header, msg = Protocol.decodeMessage(mySocket.recv(1024).decode())
 
         mySocket.close()
-        print("HEAAAADER: ",header)
+
         if (header == Protocol.HEAD_REQUEST):
             files = msg.split(",")
-            self.fileList = []
+            self.downloadFileList = []
             for f in files:
-                self.fileList.append(f)
+                self.downloadFileList.append(f)
 
 
-    def getUploadFileList(self):
-        self.uploadFileList = os.listdir(self.conf.clientSharePath)
+    def getUploadDownloadFileList(self):
+        self.uploadDownloadFileList = os.listdir(self.conf.clientSharePath)
 
-    def printUploadFileList(self):
-        for i,f in enumerate(self.uploadFileList):
+    def printUploadDownloadFileList(self):
+        for i,f in enumerate(self.uploadDownloadFileList):
             print('{:<3d}{}'.format(i, f))
 
 
     # Function to print out file names
 
-    def printFileList(self):
-        for i,f in enumerate(self.fileList):
+    def printDownloadFileList(self):
+        for i,f in enumerate(self.downloadFileList):
             print('{:<3d}{}'.format(i, f))
 
 
     # Function to let user to select a file from the list
 
     def selectDownloadFile(self):
-        if (len(self.fileList) == 0):
-            self.getFileList()
+        try:
+            if (len(self.downloadFileList) == 0):
+                self.getDownloadFileList()
+        except: 
+            self.getDownloadFileList()
         ans = -1
-        while (ans < 0 or ans > len(self.fileList)):
-            self.printFileList()
+        while (ans < 0 or ans >= len(self.downloadFileList)):
+            self.printDownloadFileList()
             print("Please select the file you want to download (Enter the number of the file)")
             try:
                 ans = int(input())
             except:
                 ans = -1
-            if (ans >= 0 and ans < len(self.fileList)):
-                return self.fileList[ans]
+            if (ans >= 0 and ans < len(self.downloadFileList)):
+                return self.downloadFileList[ans]
             print("Invalid number")
 
 
     def selectUploadFile(self):
 
-        self.getUploadFileList()
+        self.getUploadDownloadFileList()
         ans = -1
-        while (ans < 0 or ans > len(self.uploadFileList)):
-            self.printUploadFileList()
+        while (ans < 0 or ans > len(self.uploadDownloadFileList)):
+            self.printUploadDownloadFileList()
             print("Please select the file you want to upload (Enter the number of the file)")
             try:
                 ans = int(input())
             except:
                 ans = -1
-            if (ans >= 0 and ans < len(self.uploadFileList)):
-                return self.uploadFileList[ans]
+            if (ans >= 0 and ans < len(self.uploadDownloadFileList)):
+                return self.uploadDownloadFileList[ans]
             print("Invalid number")
 
 
     # Function to download file
 
-    def downloadFile(self, fileName):
+    def downloadFile(self, downloadFileName):
         mySocket = self.connect()
-        request = Protocol.prepareMessage(Protocol.HEAD_FILE, fileName)
+        request = Protocol.prepareMessage(Protocol.HEAD_FILE, downloadFileName)
 
         mySocket.send(request)
 
-        with open(self.conf.clientDownloadPath+"/"+fileName, "wb") as f:
+        with open(self.conf.clientDownloadPath+"/"+downloadFileName, "wb") as f:
             while True:
                 data = mySocket.recv(1024)
                 if not data:
                     break
                 f.write(data)
-            print(fileName+" has been downloaded!")
+            print(downloadFileName+" has been downloaded!")
             mySocket.close()
     
 
@@ -134,11 +137,18 @@ class Client:
         request = Protocol.prepareMessage(Protocol.HEAD_UPLOAD, uploadFileName)   
         mySocket.send(request)
 
-        f=open(self.conf.clientSharePath + "/"  + uploadFileName, 'rb')
-        l=f.read(1024)
-        while(l):
-            mySocket.send(l)
+
+        header, msg = Protocol.decodeMessage(mySocket.recv(1024).decode())
+
+        if (header == Protocol.HEAD_READY):
+            f=open(self.conf.clientSharePath + "/"  + uploadFileName, 'rb')
             l=f.read(1024)
+            while(l):
+                mySocket.send(l)
+                l=f.read(1024)
+        else:
+            print("Upload Failed: \nHeader: ",header," \nMessage: ",msg)
+            
 
     # Main logic of the client
 
@@ -150,8 +160,8 @@ class Client:
             selection = self.getUserSelection()
 
             if selection == 1:
-                self.getFileList()
-                self.printFileList()
+                self.getDownloadFileList()
+                self.printDownloadFileList()
                 print("Get the file list")
             elif selection == 2:
               
